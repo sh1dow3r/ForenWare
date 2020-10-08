@@ -6,7 +6,7 @@
     password: '{{ vcenter_password }}'
     datacenter: '{{ vcenter_datacenter }}'
     datastore: '{{ item }}'
-    path: "{{ forensics_VM_name }}/{{ forensics_VM_name }}-Snapshot3.vmem"
+    path: "{{ compromised_VM_name }}/{{ compromised_VM_name }}-Snapshot3.vmem"
     state: file
     validate_certs: "{{ CERT_VALIDATION }}"
   delegate_to: localhost
@@ -55,5 +55,5 @@
     username: "{{ vcenter_username }}"
     password: "{{ vcenter_password }}"
     validate_certs: "{{ CERT_VALIDATION }}"
-    dest: ./{{ forensics_VM_name }}.vmem
+    dest: ./{{ compromised_VM_name }}.vmem
     
