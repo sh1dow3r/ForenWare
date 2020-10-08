@@ -4,19 +4,12 @@ Ansiblezed script for data acquisition (Memory and Disk) from VMware vSphere pla
 
 ```sh
 *.vmx – Virtual machine configuration file.
-
 *.vmem – Virtual machine memory file
-
 *.vmdk – Virtual machine storage disk file
-
 *.vmss – Virtual machine information file
-
 *.log – Virtual machine log file
-
 *.nvram – Keeps VM’s BIOS information
-
 *.vmsn – Virtual machine snapshot file
-
 *.vmxf – Additional configuration file.```
 
 
