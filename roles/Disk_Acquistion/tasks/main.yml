@@ -12,7 +12,7 @@
   delegate_to: localhost
   ignore_errors: yes
   register: file_path_result
-  loop: '{{ vcenter_datastore }}'
+  loop: '{{ vcenter_datastores }}'
 
 
 - name: get file status and url
