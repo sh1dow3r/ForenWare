@@ -1,0 +1,12 @@
+---
+  - name: vCenter task
+    hosts: localhost
+    gather_facts: false
+    become: yes
+    vars_files:
+      - vars.yml
+    roles:
+      - Disk_Acquistion
+      #- Mem_Acquistion
+
+  
