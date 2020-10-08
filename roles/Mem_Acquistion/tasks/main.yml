@@ -1,3 +1,4 @@
+---
 - name: Query a the vmem snapshot on a datastore
   community.vmware.vsphere_file:
     host: '{{ vcenter_hostname }}'
@@ -5,23 +6,54 @@
     password: '{{ vcenter_password }}'
     datacenter: '{{ vcenter_datacenter }}'
     datastore: '{{ item }}'
-    path: "{{ forensics_VM_name }}/{{ forensics_VM_name }}-Snapshot{{ item }}.vmem"
+    path: "{{ forensics_VM_name }}/{{ forensics_VM_name }}-Snapshot3.vmem"
     state: file
     validate_certs: "{{ CERT_VALIDATION }}"
   delegate_to: localhost
   ignore_errors: yes
   register: file_path_result
-  loop: '{{ vcenter_datastore }}'
-  with_sequence: start=0 end={{ last_snapshot }}
+  loop: '{{ vcenter_datastores }}'
+
+- name: get file status and url
+  debug:
+    var: item
+    verbosity: 3
+  loop: "{{ file_path_result | json_query( url_status_query ) }}"
   vars:
-    last_snapshot: 3
+    url_status_query: "results[*].{status: status, url: url}"
+  register: status_url_result
 
+- name: print the thinhg
+  debug:
+    var: status_url_result
 
-# - name: Fetch a the nvram from vCenter
-#   uri:
-#     url: "https://10.0.1.15/folder/CentOS-8/CentOS-8.nvram?dsName=T3_SSD_2TB_2_Dev&dcPath=Moonlight_Datacenter"
-#     user: "{{ vcenter_username }}"
-#     password: "{{ vcenter_password }}"
-#     validate_certs: no
-#     method: "get"
-#     dest: ./{{ forensics_VM_name }}.vmem
+# - name: get url only
+#   debug:
+#     var: item
+#     verbosity: 3
+#   loop: "{{ file_path_result | json_query( url_query ) }}"
+#   vars:
+#     url_query: "results[*].{status: status, url: url}"
+#   register: url_result
+
+- name: get url only2
+  debug:
+    var: item
+    verbosity: 3
+  loop: "{{ status_url_result | json_query( url_query ) }}"
+  vars:
+    url_query: "results[?item.status == `200`]"
+  register: url_result
+
+- name: print the url_result0
+  debug:
+    var: url_result.results[0].item.item.url
+
+- name: Fetch a the vmem from vCenter
+  get_url:
+    url: "{{ url_result.results[0].item.item.url }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ CERT_VALIDATION }}"
+    dest: ./{{ forensics_VM_name }}.vmem
+    

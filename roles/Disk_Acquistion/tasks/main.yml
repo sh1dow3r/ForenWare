@@ -52,10 +52,10 @@
 
 
 - name: Fetch a file from datastore
-  uri:
+  get_url:
     url: "{{ url_result.results[0].item.item.url }}"
-    user: "{{ vcenter_username }}"
+    username: "{{ vcenter_username }}"
     password: "{{ vcenter_password }}"
-    validate_certs: no
-    method: "POST"
+    validate_certs: "{{ CERT_VALIDATION }}"
     dest: ./{{ forensics_VM_name }}.vmdk
+    
