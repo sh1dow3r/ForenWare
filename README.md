@@ -1,5 +1,7 @@
 # ForenWare 
 
+Ansiblezed script for data acquisition (Memory and Disk) from VMware vSphere platform.
+
 ```sh
 *.vmx – Virtual machine configuration file.
 
