@@ -1,0 +1,13 @@
+#Gloval VARS
+vcenter_hostname:             # IP/DNS of the vCenter host (vcenter.layer0.xyz)
+vcenter_username:             # SSO user in vCenter (e.g. 'DevOps@vsphere.local')
+vcenter_password:             # SSO password (e.g.'SecretPassword!')
+vcenter_datacenter:           # vCenter datacenter name (e.g. 'vCenter_Datacenter')
+vcenter_datastores:           # List of all the datastore you have in vCenter
+    -                         # 'prod_ds_1'
+    -                         # 'prod_ds_2'
+    -                         # 'prod_ds_3'
+CERT_VALIDATION: False
+
+#Image Vars
+compromised_VM_name:          # name of the vame to be invistgated (e.g. AD_Windows_2019 )
