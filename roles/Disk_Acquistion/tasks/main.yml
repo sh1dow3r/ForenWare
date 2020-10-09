@@ -56,7 +56,13 @@
 
 - name: Make directory for compromised VMs
   file:
-    path: "{{ playbook_dir }}/ForenWare_Data"
+    path: "{{ playbook_dir }}/{{ ForenDataDirName }}"
+    state: directory
+    mode: '0755'
+
+- name: Make directory for compromised VMs
+  file:
+    path: "{{ playbook_dir }}/{{ ForenDataDirName }}/Disks"
     state: directory
     mode: '0755'
 
@@ -68,7 +74,7 @@
     password: '{{ vcenter_password }}'
     name: '{{ item }}' 
     export_with_images: false
-    export_dir: "{{ playbook_dir }}/ForenWare_Data"
+    export_dir: "{{ playbook_dir }}/{{ ForenDataDirName }}/Disks"
   delegate_to: localhost
   loop: '{{ compromised_VM_names }}'
 

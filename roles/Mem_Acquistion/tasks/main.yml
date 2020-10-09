@@ -5,14 +5,17 @@
     username: '{{ vcenter_username }}'
     password: '{{ vcenter_password }}'
     datacenter: '{{ vcenter_datacenter }}'
-    datastore: '{{ item }}'
-    path: "{{ compromised_VM_name }}/{{ compromised_VM_name }}-Snapshot3.vmem"
+    datastore: '{{ item[0] }}'
+    path: "{{ item[1] }}/{{ item[1] }}-Snapshot{{ item[2] }}.vmem"
     state: file
     validate_certs: "{{ CERT_VALIDATION }}"
   delegate_to: localhost
   ignore_errors: yes
   register: file_path_result
-  loop: '{{ vcenter_datastores }}'
+  with_nested:
+    - '{{ vcenter_datastores }}'
+    - "{{ compromised_VM_names }}"
+    - ['1', '2', '3', '4','5','6' ,'7','8', '9', '10']
 
 - name: get file status and url
   debug:
@@ -27,16 +30,7 @@
   debug:
     var: status_url_result
 
-# - name: get url only
-#   debug:
-#     var: item
-#     verbosity: 3
-#   loop: "{{ file_path_result | json_query( url_query ) }}"
-#   vars:
-#     url_query: "results[*].{status: status, url: url}"
-#   register: url_result
-
-- name: get url only2
+- name: get url only
   debug:
     var: item
     verbosity: 3
@@ -49,11 +43,25 @@
   debug:
     var: url_result.results[0].item.item.url
 
+- name: Make directory for compromised VMs
+  file:
+    path: "{{ playbook_dir }}/{{ ForenDataDirName }}"
+    state: directory
+    mode: '0755'
+
+- name: Make directory for compromised VMs
+  file:
+    path: "{{ playbook_dir }}/{{ ForenDataDirName }}/Memory"
+    state: directory
+    mode: '0755'
+
 - name: Fetch a the vmem from vCenter
   get_url:
     url: "{{ url_result.results[0].item.item.url }}"
     username: "{{ vcenter_username }}"
     password: "{{ vcenter_password }}"
     validate_certs: "{{ CERT_VALIDATION }}"
-    dest: ./{{ compromised_VM_name }}.vmem
+    dest: '{{ playbook_dir }}/{{ ForenDataDirName }}/Memory/{{ item[0] }}.vmem'
+  with_nested:
+    - "{{ compromised_VM_names }}"
     
