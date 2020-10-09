@@ -33,6 +33,6 @@ In VMware a virtual machine can have few files depending on the task performed o
 
 After the playbook run, you will have a new directory `ForenWare_Data` or whatever you set the variable to in vars.yml. 
 Inside the `ForenWare_Data` folder, you will have two folder
-    * Disks: For disks images
-    * Memory: For memory images
+- Disks: For disks images
+- Memory: For memory images
 
