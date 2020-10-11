@@ -1,5 +1,14 @@
 ---
 
+- name: find out how many compromised vm to collect evidence from
+  set_fact: 
+    Forenware_length: "{{ compromised_VM_names | length | int - 1}}"
+
+- name: Generate sequance
+  set_fact:
+    ForenwareSequence: "{{ ForenwareSequence | default([]) + [item | int] }}"
+  with_sequence: start=0 end={{ Forenware_length }} 
+
 - name: get folder path for vm
   community.vmware.vmware_guest_find:
     hostname: "{{ vcenter_hostname }}"
@@ -8,40 +17,77 @@
     validate_certs: "{{ CERT_VALIDATION }}"
     name: "{{ item }}"
   delegate_to: localhost
-  register: vm_folder
+  register: vm_folders
   loop: "{{ compromised_VM_names }}"
 
-- name: Get power_state from the compromised VM
-  block:
-    - name: Get virtual machine info
-      community.vmware.vmware_vm_info:
-        hostname: '{{ vcenter_hostname }}'
-        username: '{{ vcenter_username }}'
-        password: '{{ vcenter_password }}'
-        folder: "{{ vm_folder.results[0].folders[0] }}" # change vm_folder.results[<1>].folders[0] to get the next one
-        validate_certs: "{{ CERT_VALIDATION }}"
-      delegate_to: localhost
-      register: vm_info
+- name: find vm name and its path
+  set_fact: Forenware_paths="{{ vm_folders | json_query(json_filter) | list }}"
+  vars:
+    json_filter: "results[*].{VM: item, Path: folders[0]}"
 
-      
-    - debug:
-        msg: "{{ item.power_state }}"
-      with_items:
-        - "{{ vm_info.virtual_machines | json_query(query) }}"
-      vars:
-          query: "[?guest_name=='{{ compromised_VM_names[0] }}']"
-      register: vm_status
+- name: Get virtual machine info
+  community.vmware.vmware_vm_info:
+    hostname: '{{ vcenter_hostname }}'
+    username: '{{ vcenter_username }}'
+    password: '{{ vcenter_password }}'
+    folder: "{{ item.Path }}" # change vm_folder.results[<1>].folders[0] to get the next one
+    validate_certs: "{{ CERT_VALIDATION }}"
+  delegate_to: localhost
+  register: vm_info
+  with_items: "{{ Forenware_paths }}"
 
-- name: print vm_stat
-  debug:
-    msg: "{{ vm_status.results[0].msg }}"
+# - name: set vm stat
+#   set_fact:
+#     var123: "{{ vm_info.results[0].virtual_machines[0].power_state }}"
 
-- name: ASK user to shutdown the VM
+# - name: print vm_stat
+#   debug:
+#     msg: "{{ var123 }}"
+# - name: test
+#   set_fact:
+#     power_state: "{{ item.power_state }}"
+#     with_items:
+#        - "{{ vm_info.virtual_machines | json_query(query) }}"
+#     vars:
+#       query: "[?power_state=='poweredOn']"
+
+- name: find vm name and its power_state
+  set_fact: power_state="{{ vm_info.results[0] | json_query(json_filter) | list }}"
+  vars:
+    json_filter: "virtual_machines[*].{VM: guest_name, State: power_state}"
+  register: Foreware_power_state
+
+# - name: Get power_state from the compromised VM
+#   set_fact:
+#     power_state: "{{ item[0].power_state }}"
+#     # with_items:
+#     #   - "{{ vm_info.virtual_machines | json_query(query) }}"
+#   vars:
+#       query: "[?guest_name=='{{ item[1].VM }}']"
+#   register: vm_status
+#   with_nested: 
+#       - "{{ vm_info.virtual_machines | json_query(query) }}"
+#       - "{{ Forenware_paths }}"
+
+- name: clean up the vm and power_state
+  set_fact:
+    compromised_VM_list: "{{ compromised_VM_names }}"
+
+
+
+- name: set the prompt_response value
+  set_fact:
+    prompt_response: "no"
+
+- name: ASK user for permission to shutdown the VM
   pause: 
-    prompt: "VM is running, Can't extract the vmdk. Would you like me to shut it down? Press return to continue. 
+    prompt: "VM: {{item.VM}} is running, Can't extract the vmdk. Would you like me to shut it down? Press return to continue. 
     \nTo Cancel Press Ctrl+c and then 'a' to abort"
   delegate_to: localhost
-  when: vm_status.results[0].msg == 'poweredOn'
+  when: 
+    - 'item.State == "poweredOn" and item.VM in compromised_VM_list'
+  with_items: 
+    - "{{ Foreware_power_state.ansible_facts.power_state }}"
 
 - name: shut down the vm
   community.vmware.vmware_guest_powerstate:
@@ -49,11 +95,12 @@
     username: "{{ vcenter_username }}"
     password: "{{ vcenter_password }}"
     validate_certs: "{{ CERT_VALIDATION }}"
-    folder: "{{ vm_folder.results[0].folders[0] }}"
-    name: "{{ compromised_VM_names[0] }}"
+    folder: "{{ item.Path }}"
+    name: "{{ item.VM }}"
     state: powered-off
   delegate_to: localhost
   register: deploy
+  with_items: "{{ Forenware_paths }}"
   
 
 - name: Make directory for compromised VMs
@@ -79,7 +126,6 @@
     export_dir: "{{ playbook_dir }}/{{ ForenDataDirName }}/Disks"
   delegate_to: localhost
   loop: '{{ compromised_VM_names }}'
-
 
 
 
