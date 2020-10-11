@@ -26,10 +26,6 @@
     url_status_query: "results[*].{status: status, url: url}"
   register: status_url_result
 
-- name: print the thinhg
-  debug:
-    var: status_url_result
-
 - name: get url only
   debug:
     var: item
@@ -39,7 +35,7 @@
     url_query: "results[?item.status == `200`]"
   register: url_result
 
-- name: print the url_result0
+- name: set vmem file the last snapshot file
   set_fact:
     vmem_url: "{{ url_result.results | last }}"
 
@@ -49,23 +45,19 @@
     state: directory
     mode: '0755'
 
-- name: print the thing
-  debug:
-    msg: "{{ vmem_url.item.item.url }}"
-
-- name: Make directory for compromised VMs
+- name: Make Memory directory for ForenData
   file:
     path: "{{ playbook_dir }}/{{ ForenDataDirName }}/Memory"
     state: directory
     mode: '0755'
 
-- name: Fetch a the vmem from vCenter
+- name: Fetch the vmem file from vCenter
   get_url:
     url: "{{ vmem_url.item.item.url }}"
     username: "{{ vcenter_username }}"
     password: "{{ vcenter_password }}"
     validate_certs: "{{ CERT_VALIDATION }}"
-    dest: '{{ playbook_dir }}/{{ ForenDataDirName }}/Memory/{{ item[0] }}.vmem'
-  with_nested:
+    dest: '{{ playbook_dir }}/{{ ForenDataDirName }}/Memory/{{ item }}.vmem'
+  with_items:
     - "{{ compromised_VM_names }}"
     
