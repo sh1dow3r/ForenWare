@@ -30,26 +30,11 @@
     hostname: '{{ vcenter_hostname }}'
     username: '{{ vcenter_username }}'
     password: '{{ vcenter_password }}'
-    folder: "{{ item.Path }}" # change vm_folder.results[<1>].folders[0] to get the next one
+    folder: "{{ item.Path }}" 
     validate_certs: "{{ CERT_VALIDATION }}"
   delegate_to: localhost
   register: vm_info
   with_items: "{{ Forenware_paths }}"
-
-# - name: set vm stat
-#   set_fact:
-#     var123: "{{ vm_info.results[0].virtual_machines[0].power_state }}"
-
-# - name: print vm_stat
-#   debug:
-#     msg: "{{ var123 }}"
-# - name: test
-#   set_fact:
-#     power_state: "{{ item.power_state }}"
-#     with_items:
-#        - "{{ vm_info.virtual_machines | json_query(query) }}"
-#     vars:
-#       query: "[?power_state=='poweredOn']"
 
 - name: find vm name and its power_state
   set_fact: power_state="{{ vm_info.results[0] | json_query(json_filter) | list }}"
@@ -57,27 +42,9 @@
     json_filter: "virtual_machines[*].{VM: guest_name, State: power_state}"
   register: Foreware_power_state
 
-# - name: Get power_state from the compromised VM
-#   set_fact:
-#     power_state: "{{ item[0].power_state }}"
-#     # with_items:
-#     #   - "{{ vm_info.virtual_machines | json_query(query) }}"
-#   vars:
-#       query: "[?guest_name=='{{ item[1].VM }}']"
-#   register: vm_status
-#   with_nested: 
-#       - "{{ vm_info.virtual_machines | json_query(query) }}"
-#       - "{{ Forenware_paths }}"
-
 - name: clean up the vm and power_state
   set_fact:
     compromised_VM_list: "{{ compromised_VM_names }}"
-
-
-
-- name: set the prompt_response value
-  set_fact:
-    prompt_response: "no"
 
 - name: ASK user for permission to shutdown the VM
   pause: 
@@ -102,7 +69,6 @@
   register: deploy
   with_items: "{{ Forenware_paths }}"
   
-
 - name: Make directory for compromised VMs
   file:
     path: "{{ playbook_dir }}/{{ ForenDataDirName }}"
