@@ -40,14 +40,18 @@
   register: url_result
 
 - name: print the url_result0
-  debug:
-    var: url_result.results[0].item.item.url
+  set_fact:
+    vmem_url: "{{ url_result.results | last }}"
 
 - name: Make directory for compromised VMs
   file:
     path: "{{ playbook_dir }}/{{ ForenDataDirName }}"
     state: directory
     mode: '0755'
+
+- name: print the thing
+  debug:
+    msg: "{{ vmem_url.item.item.url }}"
 
 - name: Make directory for compromised VMs
   file:
@@ -57,7 +61,7 @@
 
 - name: Fetch a the vmem from vCenter
   get_url:
-    url: "{{ url_result.results[0].item.item.url }}"
+    url: "{{ vmem_url.item.item.url }}"
     username: "{{ vcenter_username }}"
     password: "{{ vcenter_password }}"
     validate_certs: "{{ CERT_VALIDATION }}"
