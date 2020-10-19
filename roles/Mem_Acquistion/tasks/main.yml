@@ -1,4 +1,36 @@
 ---
+- name: get folder path for vm
+  community.vmware.vmware_guest_find:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ CERT_VALIDATION }}"
+    name: "{{ item }}"
+  delegate_to: localhost
+  register: vm_folders
+  loop: "{{ compromised_VM_names }}"
+
+- name: find vm name and its path
+  set_fact: Forenware_paths="{{ vm_folders | json_query(json_filter) | list }}"
+  vars:
+    json_filter: "results[*].{VM: item, Path: folders[0]}"
+
+# - name: Take snapshot of a VM with memory flag on
+#   vmware_guest_snapshot:
+#     hostname: "{{ vcenter_hostname }}"
+#     username: "{{ vcenter_username }}"
+#     password: "{{ vcenter_password }}"
+#     datacenter: "{{ vcenter_datacenter }}"
+#     folder: "{{ item.Path }}"
+#     name: "{{ item.VM }}"
+#     state: present
+#     snapshot_name: dummy_vm_snap_0001
+#     quiesce: yes
+#     memory_dump: yes
+#     validate_certs: "{{ CERT_VALIDATION }}"
+#   delegate_to: localhost
+#   with_items: "{{ Forenware_paths }}"
+
 - name: Query a the vmem snapshot on a datastore
   community.vmware.vsphere_file:
     host: '{{ vcenter_hostname }}'
@@ -6,7 +38,7 @@
     password: '{{ vcenter_password }}'
     datacenter: '{{ vcenter_datacenter }}'
     datastore: '{{ item[0] }}'
-    path: "{{ item[1] }}/{{ item[1] }}-Snapshot{{ item[2] }}.vmem"
+    path: "{{ item[1].VM }}/{{ item[1].VM }}-Snapshot{{ item[2] }}.vmem"
     state: file
     validate_certs: "{{ CERT_VALIDATION }}"
   delegate_to: localhost
@@ -14,8 +46,8 @@
   register: file_path_result
   with_nested:
     - '{{ vcenter_datastores }}'
-    - "{{ compromised_VM_names }}"
-    - ['1', '2', '3', '4','5']
+    - "{{ Forenware_paths }}"
+    - ['1', '2', '3', '4','5', '6','7','8','9','10']
 
 - name: get file status and url
   debug:
