@@ -4,7 +4,7 @@
     gather_facts: false
     become: yes
     vars_files:
-      - var.yml
+      - vars.yml
     roles:
       - Disk_Acquistion
       - Mem_Acquistion
