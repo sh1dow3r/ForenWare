@@ -6,7 +6,5 @@
     vars_files:
       - vars.yml
     roles:
-      - Disk_Acquistion
       - Mem_Acquistion
-
-  
+      - Disk_Acquistion
