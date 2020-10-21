@@ -15,8 +15,8 @@
   vars:
     json_filter: "results[*].{VM: item, Path: folders[0]}"
 
- - name: Take snapshot of a VM with memory flag on
-   vmware_guest_snapshot:
+- name: Take snapshot of a VM with memory flag on
+  vmware_guest_snapshot:
      hostname: "{{ vcenter_hostname }}"
      username: "{{ vcenter_username }}"
      password: "{{ vcenter_password }}"
@@ -28,8 +28,8 @@
      quiesce: yes
      memory_dump: yes
      validate_certs: "{{ CERT_VALIDATION }}"
-   delegate_to: localhost
-   with_items: "{{ Forenware_paths }}"
+  delegate_to: localhost
+  with_items: "{{ Forenware_paths }}"
 
 - name: Query a the vmem snapshot on a datastore
   community.vmware.vsphere_file:
