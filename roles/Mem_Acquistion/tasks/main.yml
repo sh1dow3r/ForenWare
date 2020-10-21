@@ -93,13 +93,4 @@
   with_items:
     - "{{ compromised_VM_names }}"
 
-- name: Fetch the vmsn file from vCenter
-  get_url:
-    url: "{{ vmem_url.item.item.url }}"
-    username: "{{ vcenter_username }}"
-    password: "{{ vcenter_password }}"
-    validate_certs: "{{ CERT_VALIDATION }}"
-    dest: '{{ playbook_dir }}/{{ ForenDataDirName }}/Memory/{{ item }}.vmsn'
-  with_items:
-    - "{{ compromised_VM_names }}"
-    
+  
