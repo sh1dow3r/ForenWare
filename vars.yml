@@ -10,4 +10,5 @@ vcenter_datastores:           # List of all the datastore you have in vCenter
 CERT_VALIDATION: False
 
 #Image Vars
+ForenDataDirName:             # directory name that holds acquired data
 compromised_VM_name:          # name of the vame to be invistgated (e.g. AD_Windows_2019 )
