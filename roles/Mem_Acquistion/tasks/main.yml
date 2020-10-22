@@ -24,7 +24,7 @@
      folder: "{{ item.Path }}"
      name: "{{ item.VM }}"
      state: present
-     snapshot_name: dummy_vm_snap_0001
+     snapshot_name: "{{ ForenDataDirName }}"
      quiesce: yes
      memory_dump: yes
      validate_certs: "{{ CERT_VALIDATION }}"
@@ -38,7 +38,7 @@
     password: '{{ vcenter_password }}'
     datacenter: '{{ vcenter_datacenter }}'
     datastore: '{{ item[0] }}'
-    path: "{{ item[1].VM }}/{{ item[1].VM }}-Snapshot{{ item[2] }}.vmem"
+    path: "{{ item[1].VM }}/{{ item[1].VM }}-Snapshot{{ item[2] }}.{{ item[3] }}"
     state: file
     validate_certs: "{{ CERT_VALIDATION }}"
   delegate_to: localhost
@@ -47,7 +47,8 @@
   with_nested:
     - '{{ vcenter_datastores }}'
     - "{{ Forenware_paths }}"
-    - ['1', '2', '3', '4','5', '6','7','8','9','10']
+    - ['1', '2', '3', '4','5','6','7','8','9','10']
+    - [ 'vmem', 'vmsn']
 
 - name: get file status and url
   debug:
