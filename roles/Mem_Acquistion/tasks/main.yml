@@ -1,97 +1,14 @@
 ---
-- name: get folder path for vm
-  community.vmware.vmware_guest_find:
-    hostname: "{{ vcenter_hostname }}"
-    username: "{{ vcenter_username }}"
-    password: "{{ vcenter_password }}"
-    validate_certs: "{{ CERT_VALIDATION }}"
-    name: "{{ item }}"
-  delegate_to: localhost
-  register: vm_folders
+- name: include vmsn
+  include_tasks: vmsn.yml
+  tags: Mem_Acquistion
   loop: "{{ compromised_VM_names }}"
+  loop_control:
+    loop_var: VM_Name
 
-- name: find vm name and its path
-  set_fact: Forenware_paths="{{ vm_folders | json_query(json_filter) | list }}"
-  vars:
-    json_filter: "results[*].{VM: item, Path: folders[0]}"
-
-- name: Take snapshot of a VM with memory flag on
-  vmware_guest_snapshot:
-     hostname: "{{ vcenter_hostname }}"
-     username: "{{ vcenter_username }}"
-     password: "{{ vcenter_password }}"
-     datacenter: "{{ vcenter_datacenter }}"
-     folder: "{{ item.Path }}"
-     name: "{{ item.VM }}"
-     state: present
-     snapshot_name: "{{ ForenDataDirName }}"
-     quiesce: yes
-     memory_dump: yes
-     validate_certs: "{{ CERT_VALIDATION }}"
-  delegate_to: localhost
-  with_items: "{{ Forenware_paths }}"
-
-- name: Query a the vmem snapshot on a datastore
-  community.vmware.vsphere_file:
-    host: '{{ vcenter_hostname }}'
-    username: '{{ vcenter_username }}'
-    password: '{{ vcenter_password }}'
-    datacenter: '{{ vcenter_datacenter }}'
-    datastore: '{{ item[0] }}'
-    path: "{{ item[1].VM }}/{{ item[1].VM }}-Snapshot{{ item[2] }}.{{ item[3] }}"
-    state: file
-    validate_certs: "{{ CERT_VALIDATION }}"
-  delegate_to: localhost
-  ignore_errors: yes
-  register: file_path_result
-  with_nested:
-    - '{{ vcenter_datastores }}'
-    - "{{ Forenware_paths }}"
-    - ['1', '2', '3', '4','5','6','7','8','9','10']
-    - [ 'vmem', 'vmsn']
-
-- name: get file status and url
-  debug:
-    var: item
-    verbosity: 3
-  loop: "{{ file_path_result | json_query( url_status_query ) }}"
-  vars:
-    url_status_query: "results[*].{status: status, url: url}"
-  register: status_url_result
-
-- name: get url only
-  debug:
-    var: item
-    verbosity: 3
-  loop: "{{ status_url_result | json_query( url_query ) }}"
-  vars:
-    url_query: "results[?item.status == `200`]"
-  register: url_result
-
-- name: set vmem file the last snapshot file
-  set_fact:
-    vmem_url: "{{ url_result.results | last }}"
-
-- name: Make directory for compromised VMs
-  file:
-    path: "{{ playbook_dir }}/{{ ForenDataDirName }}"
-    state: directory
-    mode: '0755'
-
-- name: Make Memory directory for ForenData
-  file:
-    path: "{{ playbook_dir }}/{{ ForenDataDirName }}/Memory"
-    state: directory
-    mode: '0755'
-
-- name: Fetch the vmem file from vCenter
-  get_url:
-    url: "{{ vmem_url.item.item.url }}"
-    username: "{{ vcenter_username }}"
-    password: "{{ vcenter_password }}"
-    validate_certs: "{{ CERT_VALIDATION }}"
-    dest: '{{ playbook_dir }}/{{ ForenDataDirName }}/Memory/{{ item }}.vmem'
-  with_items:
-    - "{{ compromised_VM_names }}"
-
-  
+- name: include vmem
+  include_tasks: vmem.yml
+  tags: Mem_Acquistion
+  loop: "{{ compromised_VM_names }}"
+  loop_control:
+    loop_var: VM_Name
