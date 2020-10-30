@@ -26,7 +26,9 @@ In VMware a virtual machine can have few files depending on the task performed o
 
 After the playbook run, you will have a new directory `ForenWare_Data` or whatever you set the variable to in vars.yml. 
 Inside the `ForenWare_Data` folder, you will have two folder
-- Disks: You can use [The Sleuthkit Framework](https://github.com/sleuthkit/sleuthkit)
+- Disks: You can convert the vmdk file to raw using the follwoing command:
+    - `qemu-img convert -f vmdk -O raw Demo_01_Ubuntu_20.vmdk Demo_01_Ubuntu_20.raw`
+    - Then use [The Sleuthkit Framework](https://github.com/sleuthkit/sleuthkit)
 - Memory: You can use [Volatility Framework](https://github.com/volatilityfoundation/volatility)
 
 
