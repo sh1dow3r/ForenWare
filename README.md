@@ -20,7 +20,7 @@ In VMware a virtual machine can have few files depending on the task performed o
 - Edit the file `vars.yml` 
 
 - Run the ansible playbook
-    - `ansible-playbook site.yaml`
+    - `ansible-playbook site.yml`
 
 ## Analysis
 
