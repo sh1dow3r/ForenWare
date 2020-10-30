@@ -11,4 +11,4 @@ CERT_VALIDATION: False
 
 #Image Vars
 ForenDataDirName:             # directory name that holds acquired data
-compromised_VM_name:          # name of the vame to be invistgated (e.g. AD_Windows_2019 )
+compromised_VM_names:          # name of the vame to be invistgated (e.g. AD_Windows_2019 )
