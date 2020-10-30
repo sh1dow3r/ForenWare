@@ -7,16 +7,8 @@ In VMware a virtual machine can have few files depending on the task performed o
 
 | file   | Description                                    | Usage                                      |              
 |--------|------------------------------------------------|--------------------------------------------|
-| .vmx   | Virtual machine configuration file             |                                            |
-| .vmxf  | Additional virtual machine configuration files |                                            |
-| .nvram | Virtual machine BIOS or EFI configuration      |                                            |
-| .vmsd	 |	Virtual machine snapshots                     |                                            |
-| .vswp	|	Virtual machine swap file                     |                                            |
-| .vmss	|	Virtual machine suspend file                  |                                            |
-| .vswp	|	Virtual machine swap file                     |                                            |
 | **.vmem**	|	**Virtual Machine volatile memory file**  | Will be used for memory analysis           |
 | **.vmss**	|	**Virtual machine suspend file**         | Will be used to extract metadata of memory |
-| **.vmsn**	|	**Virtual machine snapshot data file**  | Will be used to extract metadata of memory |
 | **.vmdk** | **Virtual machine storage disk file**     | Will be used for disk analysis            |
 
 ##  How to get started
