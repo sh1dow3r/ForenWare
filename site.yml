@@ -1,10 +1,56 @@
 ---
-  - name: vCenter task
-    hosts: localhost
-    gather_facts: false
-    become: yes
-    vars_files:
-      - vars.yml
-    roles:
-      - Mem_Acquistion
-      - Disk_Acquistion
+- name: Forensic Data Collection for VMware Environments
+  hosts: all
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: Determine the target environment
+      set_fact:
+        target_environment: "{{ lookup('env', 'TARGET_ENV') | default('vcenter', true) }}"
+
+    - name: Include vCenter specific variables
+      include_vars: 'vcenter_vars.yml'
+      when: target_environment == 'vcenter'
+
+    - name: Include ESXi specific variables
+      include_vars: 'esxi_vars.yml'
+      when: target_environment == 'esxi'
+
+    - name: Collect forensic files from vCenter
+      import_role:
+        name: Forensic_File_Collection
+        vars:
+          file_paths: "{{ vcenter_important_files }}"
+          data_directory: "{{ ForenDataDirName }}"
+          vm_names: "{{ compromised_VM_names }}"
+      when: target_environment == 'vcenter'
+
+    - name: Collect forensic files from ESXi
+      import_role:
+        name: Forensic_File_Collection
+        vars:
+          file_paths: "{{ esxi_important_files }}"
+          data_directory: "{{ ForenDataDirName }}"
+          vm_names: "{{ compromised_VM_names }}"
+      when: target_environment == 'esxi'
+
+    - name: Conduct THOR Sweep Analysis
+      import_role:
+        name: THOR_Sweep
+        vars:
+          target_hosts: "{{ groups['all'] }}"
+
+    - name: Create snapshots of compromised VMs in vCenter
+      import_role:
+        name: VM_Snapshot_Creation
+        vars:
+          vm_names: "{{ compromised_VM_names }}"
+      when: target_environment == 'vcenter'
+
+    - name: Create snapshots of compromised VMs in ESXi
+      import_role:
+        name: VM_Snapshot_Creation
+        vars:
+          vm_names: "{{ compromised_VM_names }}"
+      when: target_environment == 'esxi'

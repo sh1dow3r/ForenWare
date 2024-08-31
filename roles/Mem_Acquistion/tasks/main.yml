@@ -1,14 +1,33 @@
----
-- name: include vmsn
-  include_tasks: vmsn.yml
-  tags: Mem_Acquistion
-  loop: "{{ compromised_VM_names }}"
-  loop_control:
-    loop_var: VM_Name
+# ---
+# - name: include vmsn
+#   include_tasks: vmsn.yml
+#   tags: Mem_Acquistion
+#   loop: "{{ compromised_VM_names }}"
+#   loop_control:
+#     loop_var: VM_Name
 
-- name: include vmem
-  include_tasks: vmem.yml
-  tags: Mem_Acquistion
-  loop: "{{ compromised_VM_names }}"
-  loop_control:
-    loop_var: VM_Name
+# - name: include vmem
+#   include_tasks: vmem.yml
+#   tags: Mem_Acquistion
+#   loop: "{{ compromised_VM_names }}"
+#   loop_control:
+#     loop_var: VM_Name
+
+---
+# Memory collection tasks for VMware environments
+
+- name: Collect memory data for vCenter environments
+  include_tasks: mem-acq-vcenter.yml
+  when: target_environment == 'vcenter'
+  tags: 
+    - vcenter
+    - memory_acquistion
+    - all_collection
+
+- name: Collect memory data for ESXi environments
+  include_tasks: memory_esxi_collection.yml
+  when: target_environment == 'esxi'
+  tags: 
+    - esxi
+    - memory_acquistion
+    - all_collection

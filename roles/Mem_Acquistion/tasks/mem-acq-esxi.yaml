@@ -1,0 +1,43 @@
+---
+# Memory snapshot collection and transfer tasks for ESXi environments
+
+- name: Retrieve folder path for each VM
+  community.vmware.vmware_guest_find:
+    hostname: "{{ esxi_hostname }}"
+    username: "{{ esxi_username }}"
+    password: "{{ esxi_password }}"
+    validate_certs: "{{ CERT_VALIDATION }}"
+    name: "{{ VM_Name }}"
+  delegate_to: localhost
+  register: vm_folders
+
+- name: Set the VM path
+  set_fact:
+      VM_Path: "{{ vm_folders.folders[0] }}"
+
+- name: Take snapshot of the VM with memory flag on
+  vmware_guest_snapshot:
+      hostname: "{{ esxi_hostname }}"
+      username: "{{ esxi_username }}"
+      password: "{{ esxi_password }}"
+      datacenter: "{{ esxi_datacenter }}"
+      folder: "{{ VM_Path }}"
+      name: "{{ VM_Name }}"
+      state: present
+      snapshot_name: "{{ VM_Name }}_Memory_Snapshot"
+      memory_dump: yes
+      quiesce: yes
+      validate_certs: "{{ CERT_VALIDATION }}"
+  delegate_to: localhost
+
+- name: Fetch memory snapshot file
+  vmware_guest_download:
+    hostname: "{{ esxi_hostname }}"
+    username: "{{ esxi_username }}"
+    password: "{{ esxi_password }}"
+    validate_certs: "{{ CERT_VALIDATION }}"
+    datacenter: "{{ esxi_datacenter }}"
+    vm_id: "{{ VM_Name }}"
+    local_path: "{{ playbook_dir }}/{{ ForenDataDirName }}/Memory/{{ VM_Name }}_Memory_Snapshot.vmem"
+    remote_path: "/vmfs/volumes/{{ datastore }}/{{ VM_Name }}/{{ VM_Name }}_Memory_Snapshot.vmem"
+  delegate_to: localhost

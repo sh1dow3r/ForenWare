@@ -1,0 +1,183 @@
+---
+
+- name: find out how many compromised vm to collect evidence from
+  set_fact: 
+    Forenware_length: "{{ compromised_VM_names | length | int - 1}}"
+
+- name: Generate sequance
+  set_fact:
+    ForenwareSequence: "{{ ForenwareSequence | default([]) + [item | int] }}"
+  with_sequence: start=0 end={{ Forenware_length }} 
+
+- name: get folder path for vm
+  community.vmware.vmware_guest_find:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ CERT_VALIDATION }}"
+    name: "{{ item }}"
+  delegate_to: localhost
+  register: vm_folders
+  loop: "{{ compromised_VM_names }}"
+
+- name: find vm name and its path
+  set_fact: Forenware_paths="{{ vm_folders | json_query(json_filter) | list }}"
+  vars:
+    json_filter: "results[*].{VM: item, Path: folders[0]}"
+
+- name: Get virtual machine info
+  community.vmware.vmware_vm_info:
+    hostname: '{{ vcenter_hostname }}'
+    username: '{{ vcenter_username }}'
+    password: '{{ vcenter_password }}'
+    folder: "{{ item.Path }}" 
+    validate_certs: "{{ CERT_VALIDATION }}"
+  delegate_to: localhost
+  register: vm_info
+  with_items: "{{ Forenware_paths }}"
+
+- name: find vm name and its power_state
+  set_fact: power_state="{{ vm_info.results[0] | json_query(json_filter) | list }}"
+  vars:
+    json_filter: "virtual_machines[*].{VM: guest_name, State: power_state}"
+  register: Foreware_power_state
+
+- name: clean up the vm and power_state
+  set_fact:
+    compromised_VM_list: "{{ compromised_VM_names }}"
+
+- name: ASK user for permission to shutdown the VM
+  pause: 
+    prompt: "VM: {{item.VM}} is running, Can't extract the vmdk. Would you like me to shut it down? Press return to continue. 
+    \nTo Cancel Press Ctrl+c and then 'a' to abort"
+  delegate_to: localhost
+  when: 
+    - 'item.State == "poweredOn" and item.VM in compromised_VM_list'
+  with_items: 
+    - "{{ Foreware_power_state.ansible_facts.power_state }}"
+
+- name: shut down the vm
+  community.vmware.vmware_guest_powerstate:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: "{{ CERT_VALIDATION }}"
+    folder: "{{ item.Path }}"
+    name: "{{ item.VM }}"
+    state: powered-off
+  delegate_to: localhost
+  register: deploy
+  with_items: "{{ Forenware_paths }}"
+  
+- name: Make directory for compromised VMs
+  file:
+    path: "{{ playbook_dir }}/{{ ForenDataDirName }}"
+    state: directory
+    mode: '0755'
+
+- name: Make directory for compromised VMs
+  file:
+    path: "{{ playbook_dir }}/{{ ForenDataDirName }}/Disks"
+    state: directory
+    mode: '0755'
+
+- name: Export VMDK and extra data
+  community.vmware.vmware_export_ovf:
+    validate_certs: false
+    hostname: '{{ vcenter_hostname }}'
+    username: '{{ vcenter_username }}'
+    password: '{{ vcenter_password }}'
+    name: '{{ item }}' 
+    export_with_images: false
+    export_dir: "{{ playbook_dir }}/{{ ForenDataDirName }}/Disks"
+  delegate_to: localhost
+  loop: '{{ compromised_VM_names }}'
+
+
+
+# TODO: find a way to get the vmdk without shuting off the vm
+
+# - name: get folder path for vm
+#   community.vmware.vmware_guest_find:
+#     hostname: "{{ vcenter_hostname }}"
+#     username: "{{ vcenter_username }}"
+#     password: "{{ vcenter_password }}"
+#     validate_certs: no
+#     name: "{{ compromised_VM_name }}"
+#   delegate_to: localhost
+#   register: vm_folder
+
+# - name: get uuid form name
+#   community.vmware.vmware_guest_facts:
+#     hostname: "{{ vcenter_hostname }}"
+#     username: "{{ vcenter_username }}"
+#     password: "{{ vcenter_password }}"
+#     datacenter: "{{ vcenter_datacenter }} "
+#     validate_certs: no
+#     name: "{{ compromised_VM_name }}"
+#     folder: "{{ vm_folder.folders[0] }}"
+#   delegate_to: localhost
+#   register: vm_facts
+
+
+# - name: set vm_uuid 
+#   set_fact:
+#     vm_uuid: "{{ vm_facts.instance.instance_uuid }}"
+
+# - name: print uuid 
+#   debug:
+#     msg: "instance id: {{ vm_uuid }}"
+
+# - name: Query a file on a datastore
+#   community.vmware.vsphere_file:
+#     host: '{{ vcenter_hostname }}'
+#     username: '{{ vcenter_username }}'
+#     password: '{{ vcenter_password }}'
+#     datacenter: '{{ vcenter_datacenter }}'
+#     datastore: '{{ item }}'
+#     path: "{{ compromised_VM_name }}"
+#     state: file
+#     validate_certs: "{{ CERT_VALIDATION }}"
+#   delegate_to: localhost
+#   ignore_errors: yes
+#   register: file_path_result
+#   loop: '{{ vcenter_datastores }}'
+
+
+
+# - name: get file status and url
+#   debug:
+#     var: item
+#     verbosity: 3
+#   loop: "{{ file_path_result | json_query( url_status_query ) }}"
+#   vars:
+#     url_status_query: "results[*].{status: status, url: url}"
+#   register: status_url_result
+
+# - name: get url only
+#   debug:
+#     var: item
+#     verbosity: 1
+#   loop: "{{ status_url_result | json_query( url_query ) }}"
+#   vars:
+#     url_query: "results[?item.status == `200`]"
+#   register: url_result
+
+# - name: set vmdk_url value
+#   set_fact:
+#     vmdk_url:  '{{ url_result.results[0].item.item.url }}'
+
+
+# - name: get vmdk 
+#   script: "{{ role_path }}/library/main.py -i '{{ vm_uuid }}' -w '{{ playbook_dir }}' -s '{{ vcenter_hostname }}' -u '{{ vcenter_username }}' -p '{{ vcenter_password }}' "
+#   args:
+#    executable: python3
+
+# does not work
+# - name: Fetch a file from datastore
+#   get_url:
+#     url: "{{ vmdk_url }}"
+#     username: "{{ vcenter_username }}"
+#     password: "{{ vcenter_password }}"
+#     validate_certs: "{{ CERT_VALIDATION }}"
+#     dest: ./{{ compromised_VM_name }}.vmdk

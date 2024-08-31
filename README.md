@@ -1,36 +1,28 @@
-# ForenWare 
 
-## Overview
-Forenware is an ansiblezed script found to automate data acquisition (Memory and Disk) from VMware vSphere platform.
+# ForenWare
+Forensic Analysis Toolset for VMware Environments.
 
-In VMware a virtual machine can have few files depending on the task performed on it:
+## Description
+This toolset enables forensic data collection from VMware environments, specifically tailored to operate within both vCenter and ESXi contexts. It allows users to collect data pertinent to digital forensics investigations, ensuring compatibility and ease of use across different VMware setups.
 
-| file   | Description                                    | Usage                                      |              
-|--------|------------------------------------------------|--------------------------------------------|
-| **.vmem**	|	**Virtual Machine volatile memory file**  | Will be used for memory analysis           |
-| **.vmss**	|	**Virtual machine suspend file**         | Will be used to extract metadata of memory |
-| **.vmdk** | **Virtual machine storage disk file**     | Will be used for disk analysis            |
+## Features
+- Distinguish operations between vCenter and ESXi to optimize data retrieval.
+- Roles designed for memory and disk acquisition, supporting forensic analysis needs.
 
-##  How to get started
-- Make sure you have ansible and python3 installed 
+## Usage
+Configure the `vars.yml` for the target environment (either 'vcenter' or 'esxi'), then execute the `site.yml` playbook. Specify the target environment when launching the playbook to ensure appropriate handling of the VMware context.
 
-- You will want to the run the script `dependencies.sh`
-    - `bash dependencies.sh`
+## Roles
+- `Mem_Acquisition`: Captures memory snapshots of specified VMs, crucial for volatile data.
+- `Disk_Acquisition`: Manages disk snapshots for non-volatile data acquisition, crucial for thorough forensic analysis.
+- `Forensic_File_Collection`: Collects important forensic files from specified paths based on the environment.
+- `THOR_Sweep`: Executes THOR sweeps for malware and threat detection.
 
-- Edit the file `vars.yml` 
+## Setup
+Run `dependencies.sh` to set up necessary dependencies before executing the playbooks. This script prepares your environment by ensuring all required tools and libraries are installed.
 
-- Run the ansible playbook
-    - `ansible-playbook site.yml`
+## Contributing
+Contributions to enhance ForenWare are welcome. Please fork the repository, make your changes, and submit a pull request for review.
 
-## Analysis
-
-After the playbook run, you will have a new directory `ForenWare_Data` or whatever you set the variable to in vars.yml. 
-Inside the `ForenWare_Data` folder, you will have two folder
-- Disks: You can convert the vmdk file to raw using the follwoing command:
-    - `qemu-img convert -f vmdk -O raw Demo_01_Ubuntu_20.vmdk Demo_01_Ubuntu_20.raw`
-    - Then use [The Sleuthkit Framework](https://github.com/sleuthkit/sleuthkit)
-- Memory: You can use [Volatility Framework](https://github.com/volatilityfoundation/volatility)
-
-
-## Demo
-[You can watch a demonstration of how the tools works here](https://www.youtube.com/watch?v=SsAYqglwGvo&t=1215s)
+## License
+Distributed under the MIT License. See `LICENSE` for more information.

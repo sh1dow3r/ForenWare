@@ -1,0 +1,26 @@
+# VMware ESXi specific variables
+esxi_hosts:
+  - hostname: 'esxi01.example.com'
+  - hostname: 'esxi02.example.com'
+
+# SSL certificate validation
+CERT_VALIDATION: True
+
+# Additional Ansible configuration parameters for accessing ESXi hosts
+ansible_user: 'root'
+ansible_password: 'ESXiPassword!'
+ansible_connection: 'ssh'
+
+# Forensic data and VM specifics
+ForenDataDirName: 'Forensic_Data'               # Directory name that holds acquired data
+compromised_VM_names: ['VM_Guest1', 'VM_Guest2']    # Names of VMs to be investigated
+
+# Paths to important forensic files in an ESXi environment
+esxi_important_files:
+  - '/var/log/vmkernel.log'                  # Main kernel log
+  - '/var/log/hostd.log'                     # Host daemon log
+  - '/var/log/auth.log'                      # Authentication log
+  - '/var/log/syslog.log'                    # System log
+  - '/var/log/esxupdate.log'                 # ESXi updates log
+  - '/etc/vmware/hostd/authorization.xml'    # Host authorization settings
+  - '/etc/vmware/esx.conf'                   # Main ESXi configuration file

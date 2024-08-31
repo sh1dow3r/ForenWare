@@ -1,0 +1,23 @@
+# VMware vCenter specific variables
+vcenter_hostname: 'vcenter.example.com'
+vcenter_username: 'admin@vsphere.local'
+vcenter_password: 'vCenterPassword!'
+vcenter_datacenter: 'Main_Datacenter'
+vcenter_datastores:
+  - 'prod_ds_1'
+  - 'prod_ds_2'
+
+# SSL certificate validation
+CERT_VALIDATION: False
+
+# Forensic data and VM specifics
+ForenDataDirName: 'Forensic_Data'               # Directory name that holds acquired data
+compromised_VM_names: ['AD_Windows_2019', 'DB_Server']  # Names of VMs to be investigated
+
+# Paths to important forensic files in a vCenter environment
+vcenter_important_files:
+  - '/etc/vmware/vpx/vpxd.cfg'               # Main vCenter server configurations
+  - '/var/log/vmware/vpxd/vpxd.log'          # Main vCenter server logs
+  - '/var/log/vmware/vpx/vpxd-alert.log'     # vCenter server alert logs
+  - '/var/log/vmware/sso/'                   # SSO service logs
+  - '/etc/vmware-vpx/ssl/'                   # SSL certificates and keys
