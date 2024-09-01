@@ -13,64 +13,64 @@
 #####       VCenter Tasks               ##
 ##########################################
     - name: Include vCenter specific variables
-      include_vars: 'vcenter_vars.yml'
+      include_vars: 'vars-vcenter.yaml'
       when: target_environment == 'vcenter'
 
     - name: Collect forensic files from vCenter
-      import_role:
-        name: Disk_Acquistion
-        vars:
+      vars:
           file_paths: "{{ vcenter_important_files }}"
           data_directory: "{{ ForenDataDirName }}"
           vm_names: "{{ compromised_VM_names }}"
+      import_role:
+        name: Disk_Acquistion 
       when: target_environment == 'vcenter'
 
     - name: Create snapshots of compromised VMs in vCenter
+      vars:
+        vm_names: "{{ compromised_VM_names }}"
       import_role:
-        name: Mem_Acquistion_vCenter
-        vars:
-          vm_names: "{{ compromised_VM_names }}"
+        name: Mem_Acquistion
+        
       when: target_environment == 'vcenter'
 
-    - name: Conduct THOR Sweep Analysis
+    - name: Conduct IOC Sweep Analysis
       import_role:
-        name: THOR_Sweep
-        vars:
+        name: ioc_sweep
       when: target_environment == 'vcenter'
 
 ##########################################
 #####       ESXi Tasks                  ##
 ##########################################
     - name: Include ESXi specific variables
-      include_vars: 'esxi_vars.yml'
+      include_vars: 'vars-esxi.yaml'
       when: target_environment == 'esxi'
 
     - name: Collect forensic files from ESXi
-      import_role:
-        name: Disk_Acquistion_ESXi
-        vars:
+      vars:
           data_directory: "{{ ForenDataDirName }}"
           vm_names: "{{ compromised_VM_names }}"
+      import_role:
+        name: Disk_Acquistion
       when: target_environment == 'esxi'
 
-    - name: Collect forensic files from ESXi
-      import_role:
-        name: Forensic_File_Collection
-        vars:
-          file_paths: "{{ esxi_important_files }}"
-          data_directory: "{{ ForenDataDirName }}"
-          vm_names: "{{ compromised_VM_names }}"
-      when: target_environment == 'esxi'
+    # - name: Collect forensic files from ESXi
+    #   import_role:
+    #     name: Forensic_File_Collection
+    #     vars:
+    #       file_paths: "{{ esxi_important_files }}"
+    #       data_directory: "{{ ForenDataDirName }}"
+    #       vm_names: "{{ compromised_VM_names }}"
+    #   when: target_environment == 'esxi'
       
-    - name: Create snapshots of compromised VMs in ESXi
-      import_role:
-        name: VM_Snapshot_Creation
-        vars:
-          vm_names: "{{ compromised_VM_names }}"
-      when: target_environment == 'esxi'
+    # - name: Create snapshots of compromised VMs in ESXi
+    #   import_role:
+    #     name: VM_Snapshot_Creation
+    #     vars:
+    #       vm_names: "{{ compromised_VM_names }}"
+    #   when: target_environment == 'esxi'
 
-    - name: Conduct THOR Sweep Analysis on ESXi
-      import_role:
-        name: THOR_Sweep
-        vars:
-      when: target_environment == 'esxi'
+    # - name: Conduct IOC Sweep Analysis on ESXi
+    #   import_role:
+    #     name: IOC_Sweep
+    #     vars:
+    #   when: target_environment == 'esxi'

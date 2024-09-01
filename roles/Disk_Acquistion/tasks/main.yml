@@ -1,6 +1,20 @@
 ---
 # Main entry for the Forensic File Collection role
 
+# Common Tasks for collecting disk images from ESXi environments
+
+- name: Ensure directory for storing collected files exists
+  ansible.builtin.file:
+    path: "{{ playbook_dir }}/{{ ForenDataDirName }}"
+    state: directory
+    mode: '0755'
+
+- name: Ensure directory for storing VM disks exists
+  ansible.builtin.file:
+    path: "{{ playbook_dir }}/{{ ForenDataDirName }}/Disks"
+    state: directory
+    mode: '0755'
+
 - name: Collect data from vCenter
   include_tasks: disk_image_vcenter_collection.yml
   when: target_environment == 'vcenter'
@@ -10,7 +24,7 @@
     - all_collection
 
 - name: Collect data from ESXi
-  include_tasks: disk_image_esxi_collection.yml
+  include_tasks: disk_image_esxi_collection.yaml
   when: target_environment == 'esxi'
   tags: 
     - esxi
