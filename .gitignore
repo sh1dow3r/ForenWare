@@ -1,4 +1,5 @@
 main.py
-var.yml
+vars-esxi.yaml
+vars-vcenter.yaml
 ForenWare_Data/
 Forensic_Data/
