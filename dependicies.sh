@@ -41,6 +41,12 @@ if ! sudo apt install sshfs -y; then
     exit 1
 fi
 
+echo -e "${GREEN}Installing sshpass...${NC}"
+if ! sudo apt install sshpass -y; then
+    echo -e "${RED}Failed to install sshpass.${NC}"
+    exit 1
+fi
+
 echo -e "${GREEN}Checking for additional Python dependencies...${NC}"
 if ! sudo pip3 install --upgrade pip; then
     echo -e "${RED}Failed to upgrade Pip.${NC}"
