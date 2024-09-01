@@ -1,10 +1,11 @@
 # VMware ESXi specific variables
-esxi_hosts:
-  - hostname: '172.16.1.111'
-#  - hostname: 'esxi02.example.com'
+esxi_hostname: 'esxi02.example.com'
+
+esxi_username: 'root'
+esxi_password: 'Password@123'
 
 # SSL certificate validation
-CERT_VALIDATION: True
+CERT_VALIDATION: False
 
 # Additional Ansible configuration parameters for accessing ESXi hosts
 ansible_user: 'root'
