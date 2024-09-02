@@ -2,6 +2,7 @@
 esxi_hostname: '172.16.1.111'
 esxi_username: 'root'
 esxi_password: 'Password@123'
+datacenter_name: "ha-datacenter"
 
 # SSL certificate validation
 CERT_VALIDATION: False
@@ -13,7 +14,7 @@ ansible_connection: 'ssh'
 
 # Forensic data and VM specifics
 ForenDataDirName: 'ForenWare_Data'               # Directory name that holds acquired data
-compromised_VM_names: ['BlackHatDemo-VM', 'BlackHatDemo-VMv2']    # Names of VMs to be investigated
+compromised_VM_names: ['BlackHatDemo-VM', 'BlackHatDemo-VMv2', "Alpinev1"]    # Names of VMs to be investigated
 
 # Paths to important forensic files in an ESXi environment
 esxi_important_files:

@@ -49,12 +49,12 @@
     #     name: Forenware_Artifacts
     #   when: target_environment == 'esxi'
       
-    # - name: Collect memory images from ESXi for compromised VMs
-    #   import_role:
-    #     name: Mem_Acquistion
-    #   when: target_environment == 'esxi'
-
-    - name: Conduct IOC Sweep Analysis on ESXi
+    - name: Collect memory images from ESXi for compromised VMs
       import_role:
-        name: IOC_Sweep
+        name: Mem_Acquistion
       when: target_environment == 'esxi'
+
+    # - name: Conduct IOC Sweep Analysis on ESXi
+    #   import_role:
+    #     name: IOC_Sweep
+    #   when: target_environment == 'esxi'
