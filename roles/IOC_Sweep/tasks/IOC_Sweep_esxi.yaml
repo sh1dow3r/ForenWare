@@ -45,7 +45,7 @@
 - name: Mount ESXi filesystem using SSHFS
   ansible.builtin.shell:
     cmd: "sudo sshfs -o reconnect root@{{ esxi_hostname }}:/ '{{ ioc_sweep_mount_point }}' "
-  ignore_errors: yes  # Depending on your error handling strategy
+  ignore_errors: yes  # ignore if already monuted
   delegate_to: localhost
 
 
