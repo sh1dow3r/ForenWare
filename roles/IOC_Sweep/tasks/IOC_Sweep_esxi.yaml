@@ -1,4 +1,11 @@
 ---
+
+- name: get the username running the deploy
+  become: false
+  local_action: command whoami
+  register: username_on_the_host
+  delegate_to: localhost
+
 - name: Ensure directory for storing collected files exists
   ansible.builtin.file:
     path: "{{ playbook_dir }}/{{ ForenDataDirName }}"
@@ -8,9 +15,19 @@
     mode: '0755'
   delegate_to: localhost
 
-- name: Ensure directory for storing VM disks exists
+- name: Ensure directory for the mount point exists
   ansible.builtin.file:
     path: "{{ playbook_dir }}/{{ ForenDataDirName }}/ioc_sweep_mount_point"
+    state: directory
+    owner: "{{ username_on_the_host.stdout }}"
+    group: "{{ username_on_the_host.stdout }}"
+    mode: '0755'
+  delegate_to: localhost
+
+
+- name: Ensure directory for the ioc sweep results  exists
+  ansible.builtin.file:
+    path: "{{ playbook_dir }}/{{ ForenDataDirName }}/ioc_sweep_results"
     state: directory
     owner: "{{ username_on_the_host.stdout }}"
     group: "{{ username_on_the_host.stdout }}"
@@ -21,18 +38,20 @@
   set_fact:
     ioc_sweep_mount_point: "{{ playbook_dir }}/{{ ForenDataDirName }}/ioc_sweep_mount_point"
 
-
-- name: Mount ESXi filesystem using SSHFS
-  ansible.builtin.shell:
-    cmd: "sshfs -o -reconnect {{ ansible_user }}@{{ esxi_host }}:/ '{{ ioc_sweep_mount_point }}' "
-  ignore_errors: yes  # Depending on your error handling strategy
-
 - name: Define thor-lite path
   set_fact:
     thor_path: "{{ playbook_dir }}/tools/thor"
 
+- name: Mount ESXi filesystem using SSHFS
+  ansible.builtin.shell:
+    cmd: "sudo sshfs -o reconnect root@{{ esxi_hostname }}:/ '{{ ioc_sweep_mount_point }}' "
+  ignore_errors: yes  # Depending on your error handling strategy
+  delegate_to: localhost
+
+
 - name: Run THOR Lite scan on the mounted ESXi filesystem
   ansible.builtin.shell:
-    cmd: "{{ thor_path }}/thor-lite-linux-64 -a FileScan --alldrives -p '{{ mount_point }}'"
+    cmd: "{{ thor_path }}/thor-lite-linux-64 -a FileScan --alldrives -p '{{ ioc_sweep_mount_point }}' --intense --rebase-dir '{{ ioc_sweep_mount_point }}'"
   register: thor_scan_result
+  delegate_to: localhost
 

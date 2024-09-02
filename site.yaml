@@ -29,7 +29,7 @@
 
     - name: Conduct IOC Sweep Analysis
       import_role:
-        name: ioc_sweep
+        name: IOC_Sweep
       when: target_environment == 'vcenter'
 
 ##########################################
@@ -39,10 +39,10 @@
       include_vars: 'vars-esxi.yaml'
       when: target_environment == 'esxi'
 
-    - name: Collect disk images from ESXi
-      import_role:
-        name: Disk_Acquistion
-      when: target_environment == 'esxi'
+    # - name: Collect disk images from ESXi
+    #   import_role:
+    #     name: Disk_Acquistion
+    #   when: target_environment == 'esxi'
 
     # - name: Collect forensic files from ESXi
     #   import_role:
@@ -54,7 +54,7 @@
     #     name: Mem_Acquistion
     #   when: target_environment == 'esxi'
 
-    # - name: Conduct IOC Sweep Analysis on ESXi
-    #   import_role:
-    #     name: IOC_Sweep
-    #   when: target_environment == 'esxi'
+    - name: Conduct IOC Sweep Analysis on ESXi
+      import_role:
+        name: IOC_Sweep
+      when: target_environment == 'esxi'
