@@ -1,34 +1,103 @@
 ---
 # Memory snapshot collection and transfer tasks for ESXi environments
+- name: get the username running the deploy
+  become: false
+  local_action: command whoami
+  register: username_on_the_host
+  delegate_to: localhost
 
-- name: Retrieve folder path for each VM
-  community.vmware.vmware_guest_find:
+- name: Ensure directory for storing collected files exists
+  ansible.builtin.file:
+    path: "{{ playbook_dir }}/{{ ForenDataDirName }}"
+    state: directory
+    owner: "{{ username_on_the_host.stdout }}"
+    group: "{{ username_on_the_host.stdout }}"
+    mode: '0755'
+  delegate_to: localhost
+
+- name: Ensure directory for the mount point exists
+  ansible.builtin.file:
+    path: "{{ playbook_dir }}/{{ ForenDataDirName }}/Memory-Images"
+    state: directory
+    owner: "{{ username_on_the_host.stdout }}"
+    group: "{{ username_on_the_host.stdout }}"
+    mode: '0755'
+  delegate_to: localhost
+
+
+- name: Create a snapshot
+  community.vmware.vmware_guest_snapshot:
     hostname: "{{ esxi_hostname }}"
     username: "{{ esxi_username }}"
     password: "{{ esxi_password }}"
+    datacenter: "{{ datacenter_name }}"
+    folder: "/{{ datacenter_name }}/vm/"
+    name: "{{ item }}"
+    state: present
+    quiesce: true
+    memory_dump: true
+    snapshot_name: "{{ item }}_Memory_Snapshot"
     validate_certs: "{{ CERT_VALIDATION }}"
-    name: "{{ compromised_VM_names }}"
+    description: "{{ item }} memory acquistion by forenware"
   delegate_to: localhost
-  register: vm_folders
+  loop: "{{ compromised_VM_names }}"
 
-- name: Set the VM path
-  set_fact:
-      VM_Path: "{{ vm_folders.folders[0] }}"
 
-- name: Take snapshot of the VM with memory flag on
-  vmware_guest_snapshot:
-      hostname: "{{ esxi_hostname }}"
-      username: "{{ esxi_username }}"
-      password: "{{ esxi_password }}"
-      datacenter: "{{ esxi_datacenter }}"
-      folder: "{{ VM_Path }}"
-      name: "{{ VM_Name }}"
-      state: present
-      snapshot_name: "{{ VM_Name }}_Memory_Snapshot"
-      memory_dump: yes
-      quiesce: yes
-      validate_certs: "{{ CERT_VALIDATION }}"
+
+- name: Gather snapshot information about the virtual machine in the given vCenter
+  community.vmware.vmware_guest_snapshot_info:
+    hostname: "{{ esxi_hostname }}"
+    username: "{{ esxi_username }}"
+    password: "{{ esxi_password }}"
+    datacenter: "{{ datacenter_name }}"
+    folder: "/{{ datacenter_name }}/vm/"
+    name: "{{ item }}"
+    validate_certs: "{{ CERT_VALIDATION }}"
   delegate_to: localhost
+  loop: "{{ compromised_VM_names }}"
+
+- name: Fetch snapshot.vmem from remote host using scp
+  ansible.builtin.shell:
+    cmd: "scp {{ ansible_user }}@{{ inventory_hostname }}:/vmfs/volumes/datastore1/{{ item }}/{{ item }}-Snapshot1.vmem {{ playbook_dir }}/{{ ForenDataDirName }}/Memory-Images/{{ item }}-Snapshot1.vmem"
+  delegate_to: localhost
+  loop: "{{ compromised_VM_names }}"
+
+- name: Fetch snapshot.vmsn from remote host using scp
+  ansible.builtin.shell:
+    cmd: "scp {{ ansible_user }}@{{ inventory_hostname }}:/vmfs/volumes/datastore1/{{ item }}/{{ item }}-Snapshot1.vmsn {{ playbook_dir }}/{{ ForenDataDirName }}/Memory-Images/{{ item }}-Snapshot1.vmsn"
+  delegate_to: localhost
+  loop: "{{ compromised_VM_names }}"
+
+
+# - name: Remove a snapshot and snapshot subtree
+#   community.vmware.vmware_guest_snapshot:
+#     hostname: "{{ esxi_hostname }}"
+#     username: "{{ esxi_username }}"
+#     password: "{{ esxi_password }}"
+#     datacenter: "{{ datacenter_name }}"
+#     folder: "/{{ datacenter_name }}/vm/"
+#     name: "{{ item }}"
+#     state: absent
+#     validate_certs: "{{ CERT_VALIDATION }}"
+#     remove_children: true
+#     snapshot_name: "{{ item }}_Memory_Snapshot"
+#   delegate_to: localhost
+#   loop: "{{ compromised_VM_names }}"
+
+# - name: Take snapshot of the VM with memory flag on
+#   vmware_guest_snapshot:
+#       hostname: "{{ esxi_hostname }}"
+#       username: "{{ esxi_username }}"
+#       password: "{{ esxi_password }}"
+#       datacenter: "{{ esxi_datacenter }}"
+#       folder: "{{ VM_Path }}"
+#       name: "{{ VM_Name }}"
+#       state: present
+#       snapshot_name: "{{ VM_Name }}_Memory_Snapshot"
+#       memory_dump: yes
+#       quiesce: yes
+#       validate_certs: "{{ CERT_VALIDATION }}"
+#   delegate_to: localhost
 
 # - name: Fetch memory snapshot file
 #   vmware_guest_download:
