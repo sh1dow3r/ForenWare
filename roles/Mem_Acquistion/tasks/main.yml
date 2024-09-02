@@ -17,7 +17,7 @@
 # Memory collection tasks for VMware environments
 
 - name: Collect memory data for vCenter environments
-  include_tasks: mem-acq-vcenter.yml
+  include_tasks: mem_image_vcenter_collection.yaml
   when: target_environment == 'vcenter'
   tags: 
     - vcenter
@@ -25,7 +25,7 @@
     - all_collection
 
 - name: Collect memory data for ESXi environments
-  include_tasks: memory_esxi_collection.yml
+  include_tasks: mem_image_esxi_collection.yaml
   when: target_environment == 'esxi'
   tags: 
     - esxi

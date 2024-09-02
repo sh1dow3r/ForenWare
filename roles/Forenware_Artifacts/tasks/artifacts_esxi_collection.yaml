@@ -1,0 +1,254 @@
+---
+
+#########################
+#ESXi host facts 
+#########################
+- name: Gather vmware host facts
+  community.vmware.vmware_host_facts:
+    hostname: '{{ esxi_hostname }}'
+    username: '{{ esxi_username }}'
+    password: '{{ esxi_password }}'
+    validate_certs: '{{ CERT_VALIDATION }}'
+  delegate_to: localhost
+  register: esxi_host_facts
+
+- name: Print Gather vmware host facts
+  debug:
+    msg: "{{ esxi_host_facts }}"
+
+- name: Save Gather vmware host facts to a file
+  ansible.builtin.copy:
+    content: "{{ esxi_host_facts }}"
+    dest: "{{ playbook_dir }}/{{ ForenDataDirName }}/ESXi-Artifacts/esxi_host_facts.json"
+  delegate_to: localhost
+
+
+##########################
+#ESXi General Information 
+##########################
+- name: Provide general information about a standalone ESXi server
+  community.vmware.vmware_about_info:
+    hostname: '{{ esxi_hostname }}'
+    username: '{{ esxi_username }}'
+    password: '{{ esxi_password }}'
+    validate_certs: '{{ CERT_VALIDATION }}'
+  delegate_to: localhost
+  register: esxi_about_info
+
+- name: Print general information about a standalone ESXi server
+  debug:
+    msg: "{{ esxi_about_info }}"
+
+- name: Save Gathered config about ESXi Host
+  ansible.builtin.copy:
+    content: "{{ esxi_about_info }}"
+    dest: "{{ playbook_dir }}/{{ ForenDataDirName }}/ESXi-Artifacts/esxi_about_info.json"
+  delegate_to: localhost
+
+
+##########################
+#ESXi config Information 
+##########################
+- name: Gather host config about ESXi Host
+  community.vmware.vmware_host_config_info:
+    hostname: '{{ esxi_hostname }}'
+    username: '{{ esxi_username }}'
+    password: '{{ esxi_password }}'
+    esxi_hostname: '{{ esxi_hostname }}'
+    validate_certs: '{{ CERT_VALIDATION }}'
+  delegate_to: localhost
+  register: esxi_config_info
+
+- name: Print host config about ESXi Host
+  debug:
+    msg: "{{ esxi_config_info }}"
+
+- name: Save host config about ESXi Host
+  ansible.builtin.copy:
+    content: "{{ esxi_config_info }}"
+    dest: "{{ playbook_dir }}/{{ ForenDataDirName }}/ESXi-Artifacts/esxi_config_info.json"
+  delegate_to: localhost
+
+
+
+
+##########################
+#ESXi user Information 
+##########################
+- name: Gather info about all Users on given ESXi host system
+  community.vmware.vmware_local_user_info:
+    hostname: '{{ esxi_hostname }}'
+    username: '{{ esxi_username }}'
+    password: '{{ esxi_password }}'
+    validate_certs: '{{ CERT_VALIDATION }}'
+  delegate_to: localhost
+  register: all_user_info
+
+- name: Print info about all Users on given ESXi host system
+  debug:
+    msg: "{{ all_user_info }}"
+
+- name: Save info about all Users on given ESXi host system
+  ansible.builtin.copy:
+    content: "{{ all_user_info }}"
+    dest: "{{ playbook_dir }}/{{ ForenDataDirName }}/ESXi-Artifacts/all_user_info.json"
+  delegate_to: localhost
+
+##########################
+#ESXi datastore Information 
+##########################
+- name: Gather info from standalone ESXi server having datacenter as 'ha-datacenter'
+  community.vmware.vmware_datastore_info:
+    hostname: '{{ esxi_hostname }}'
+    username: '{{ esxi_username }}'
+    password: '{{ esxi_password }}'
+    datacenter_name: "ha-datacenter"
+    validate_certs: '{{ CERT_VALIDATION }}'
+  delegate_to: localhost
+  register: info_standalone_esxi_datastore
+
+- name: Print info from standalone ESXi datastore
+  debug:
+    msg: "{{ info_standalone_esxi_datastore }}"
+
+- name: Save info from standalone ESXi datastore to file
+  ansible.builtin.copy:
+    content: "{{ info_standalone_esxi_datastore }}"
+    dest: "{{ playbook_dir }}/{{ ForenDataDirName }}/ESXi-Artifacts/info_standalone_esxi_datastore.json"
+  delegate_to: localhost
+
+
+
+##########################
+#ESXi feature capability Information 
+##########################
+- name: Gather feature capability info about all ESXi Hosts in given Cluster
+  community.vmware.vmware_host_feature_info:
+    hostname: '{{ esxi_hostname }}'
+    username: '{{ esxi_username }}'
+    password: '{{ esxi_password }}'
+    esxi_hostname: "{{ esxi_hostname }}"
+    validate_certs: '{{ CERT_VALIDATION }}'
+  delegate_to: localhost
+  register: all_feature_capability
+
+
+- name: Print info from compromised vm 
+  debug:
+    msg: "{{ all_feature_capability }}"
+
+- name: Save gathered disk info from virtual machine using nameto file
+  ansible.builtin.copy:
+    content: "{{ all_feature_capability }}"
+    dest: "{{ playbook_dir }}/{{ ForenDataDirName }}/ESXi-Artifacts/all_feature_capability.json"
+  delegate_to: localhost
+
+
+##########################
+#ESXi host package Information 
+##########################
+- name: Gather host packages about ESXi Host
+  community.vmware.vmware_host_package_info:
+    hostname: '{{ esxi_hostname }}'
+    username: '{{ esxi_username }}'
+    password: '{{ esxi_password }}'
+    esxi_hostname: "{{ esxi_hostname }}"
+    validate_certs: '{{ CERT_VALIDATION }}'
+  delegate_to: localhost
+  register: host_packages
+
+
+- name: Print host packages about ESXi Host
+  debug:
+    msg: "{{ host_packages }}"
+
+- name: Save gathered host packages about ESXi Host
+  ansible.builtin.copy:
+    content: "{{ host_packages }}"
+    dest: "{{ playbook_dir }}/{{ ForenDataDirName }}/ESXi-Artifacts/host_packages.json"
+  delegate_to: localhost
+
+
+##########################
+#ESXi firewall Information 
+##########################
+- name: Gather firewall info about ESXi Host
+  community.vmware.vmware_host_firewall_info:
+    hostname: '{{ esxi_hostname }}'
+    username: '{{ esxi_username }}'
+    password: '{{ esxi_password }}'
+    esxi_hostname: '{{ esxi_hostname }}'
+    validate_certs: '{{ CERT_VALIDATION }}'
+  delegate_to: localhost
+  register: all_host_firewall
+
+- name: Print info from compromised vm 
+  debug:
+    msg: "{{ all_host_firewall }}"
+
+- name: Save gathered disk info from virtual machine using nameto file
+  ansible.builtin.copy:
+    content: "{{ all_host_firewall }}"
+    dest: "{{ playbook_dir }}/{{ ForenDataDirName }}/ESXi-Artifacts/all_host_firewall.json"
+  delegate_to: localhost
+
+
+
+##########################
+#ESXi vm disk Information 
+##########################
+- name: Gather disk info from virtual machine using name
+  community.vmware.vmware_guest_disk_info:
+    hostname: '{{ esxi_hostname }}'
+    username: '{{ esxi_username }}'
+    password: '{{ esxi_password }}'
+    datacenter: ha-datacenter
+    name: '{{ item }}'
+    validate_certs: '{{ CERT_VALIDATION }}'
+  delegate_to: localhost
+  loop: "{{ compromised_VM_names }}"
+  register: disk_info_compromised_vm
+
+- name: Print info from compromised vm 
+  debug:
+    msg: "{{ disk_info_compromised_vm }}"
+
+- name: Save gathered disk info from virtual machine using name to file
+  ansible.builtin.copy:
+    content: "{{ disk_info_compromised_vm }}"
+    dest: "{{ playbook_dir }}/{{ ForenDataDirName }}/ESXi-Artifacts/disk_info_compromised_vm.json"
+  delegate_to: localhost
+
+
+
+
+# - name: Gather iSCSI configuration information of ESXi host
+#   community.vmware.vmware_host_iscsi_info:
+#     hostname: '{{ esxi_hostname }}'
+#     username: '{{ esxi_username }}'
+#     password: '{{ esxi_password }}'
+#     esxi_hostname: "{{ esxi_hostname }}"
+#     validate_certs: '{{ CERT_VALIDATION }}'
+#   delegate_to: localhost
+#   register: iscsi_info
+
+# - name: Collect and archive system logs
+#   ansible.builtin.archive:
+#     path: 
+#       - /var/log/auth.log
+#       - /var/log/syslog
+#     path_to_be_collected: /mnt/esx/var/log/
+#     dest: "/forensic_storage/logs_{{ inventory_hostname }}.tar.gz"
+#     "{{ playbook_dir }}/{{ ForenDataDirName }}/ESXi-Artifacts/"
+
+# - name: Collect and archive user data
+#   ansible.builtin.archive:
+#     path: /mnt/esx/home/
+#     dest: "/forensic_storage/userdata_{{ inventory_hostname }}.tar.gz"
+
+# - name: Collect and archive configuration files
+#   ansible.builtin.archive:
+#     path:
+#       - /mnt/esx/etc/passwd
+#       - /mnt/esx/etc/group
+#     dest: "/forensic_storage/config_files_{{ inventory_hostname }}.tar.gz"

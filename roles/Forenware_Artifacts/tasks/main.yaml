@@ -21,7 +21,7 @@
 
 - name: Ensure directory for storing VM disks exists
   ansible.builtin.file:
-    path: "{{ playbook_dir }}/{{ ForenDataDirName }}/Disks"
+    path: "{{ playbook_dir }}/{{ ForenDataDirName }}/ESXi-Artifacts"
     state: directory
     owner: "{{ username_on_the_host.stdout }}"
     group: "{{ username_on_the_host.stdout }}"
@@ -29,7 +29,7 @@
   delegate_to: localhost
 
 - name: Collect data from vCenter
-  include_tasks: disk_image_vcenter_collection.yml
+  include_tasks: artifacts_vcenter_collection.yaml
   when: target_environment == 'vcenter'
   tags: 
     - vcenter
@@ -37,7 +37,7 @@
     - all_collection
 
 - name: Collect data from ESXi
-  include_tasks: disk_image_esxi_collection.yaml
+  include_tasks: artifacts_esxi_collection.yaml
   when: target_environment == 'esxi'
   tags: 
     - esxi

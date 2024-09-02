@@ -1,0 +1,18 @@
+---
+# IOC Sweep tasks for VMware environments
+
+- name: IOC Sweepfor vCenter environments
+  include_tasks: IOC_Sweep_vcenter.yaml
+  when: target_environment == 'vcenter'
+  tags: 
+    - vcenter
+    - memory_acquistion
+    - all_collection
+
+- name: IOC Sweep for ESXi environments
+  include_tasks: IOC_Sweep_esxi.yaml
+  when: target_environment == 'esxi'
+  tags: 
+    - esxi
+    - memory_acquistion
+    - all_collection

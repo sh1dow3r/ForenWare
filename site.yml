@@ -17,17 +17,11 @@
       when: target_environment == 'vcenter'
 
     - name: Collect forensic files from vCenter
-      vars:
-          file_paths: "{{ vcenter_important_files }}"
-          data_directory: "{{ ForenDataDirName }}"
-          vm_names: "{{ compromised_VM_names }}"
       import_role:
         name: Disk_Acquistion 
       when: target_environment == 'vcenter'
 
     - name: Create snapshots of compromised VMs in vCenter
-      vars:
-        vm_names: "{{ compromised_VM_names }}"
       import_role:
         name: Mem_Acquistion
         
@@ -45,32 +39,22 @@
       include_vars: 'vars-esxi.yaml'
       when: target_environment == 'esxi'
 
-    - name: Collect forensic files from ESXi
-      vars:
-          data_directory: "{{ ForenDataDirName }}"
-          vm_names: "{{ compromised_VM_names }}"
+    - name: Collect disk images from ESXi
       import_role:
         name: Disk_Acquistion
       when: target_environment == 'esxi'
 
     # - name: Collect forensic files from ESXi
     #   import_role:
-    #     name: Forensic_File_Collection
-    #     vars:
-    #       file_paths: "{{ esxi_important_files }}"
-    #       data_directory: "{{ ForenDataDirName }}"
-    #       vm_names: "{{ compromised_VM_names }}"
+    #     name: Forenware_Artifacts
     #   when: target_environment == 'esxi'
       
-    # - name: Create snapshots of compromised VMs in ESXi
+    # - name: Collect memory images from ESXi for compromised VMs
     #   import_role:
-    #     name: VM_Snapshot_Creation
-    #     vars:
-    #       vm_names: "{{ compromised_VM_names }}"
+    #     name: Mem_Acquistion
     #   when: target_environment == 'esxi'
 
     # - name: Conduct IOC Sweep Analysis on ESXi
     #   import_role:
     #     name: IOC_Sweep
-    #     vars:
     #   when: target_environment == 'esxi'
