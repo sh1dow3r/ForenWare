@@ -15,7 +15,7 @@
     mode: '0755'
   delegate_to: localhost
 
-- name: Ensure directory for the mount point exists
+- name: Ensure directory for the mem-images exists
   ansible.builtin.file:
     path: "{{ playbook_dir }}/{{ ForenDataDirName }}/Memory-Images"
     state: directory
@@ -41,8 +41,8 @@
     description: "{{ item }} memory acquistion by forenware"
   delegate_to: localhost
   loop: "{{ compromised_VM_names }}"
-
-
+  async: 45
+  poll: 0
 
 - name: Gather snapshot information about the virtual machine in the given vCenter
   community.vmware.vmware_guest_snapshot_info:
@@ -59,6 +59,7 @@
 - name: Fetch snapshot.vmem from remote host using scp
   ansible.builtin.shell:
     cmd: "scp {{ ansible_user }}@{{ inventory_hostname }}:/vmfs/volumes/datastore1/{{ item }}/{{ item }}-Snapshot1.vmem {{ playbook_dir }}/{{ ForenDataDirName }}/Memory-Images/{{ item }}-Snapshot1.vmem"
+  become: true
   delegate_to: localhost
   loop: "{{ compromised_VM_names }}"
 
@@ -67,6 +68,9 @@
     cmd: "scp {{ ansible_user }}@{{ inventory_hostname }}:/vmfs/volumes/datastore1/{{ item }}/{{ item }}-Snapshot1.vmsn {{ playbook_dir }}/{{ ForenDataDirName }}/Memory-Images/{{ item }}-Snapshot1.vmsn"
   delegate_to: localhost
   loop: "{{ compromised_VM_names }}"
+  become: true
+  async: 45
+  poll: 0
 
 
 # - name: Remove a snapshot and snapshot subtree
