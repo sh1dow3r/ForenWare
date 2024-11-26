@@ -8,7 +8,7 @@ ForenWare is a forensic data collection toolset tailored for VMware environments
 ## Key Features
 - **Dual Environment Support**: Seamless operation in **vCenter** and **ESXi** contexts.
 - **Forensic Data Acquisition**: Capture memory snapshots and disk images for in-depth forensic analysis.
-- **Threat Detection**: Integrates with **THOR** to detect malware and indicators of compromise (IOCs).
+- **Threat Detection**: Integrates with **THOR** and **Yara-x** to detect malware and indicators of compromise (IOCs).
 
 ## Setup
 
