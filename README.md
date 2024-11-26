@@ -1,28 +1,67 @@
 
 # ForenWare
-Forensic Analysis Toolset for VMware Environments.
+Forensic Analysis Toolset for VMware Environments
 
-## Description
-This toolset enables forensic data collection from VMware environments, specifically tailored to operate within both vCenter and ESXi contexts. It allows users to collect data pertinent to digital forensics investigations, ensuring compatibility and ease of use across different VMware setups.
+## Overview
+ForenWare is a forensic data collection toolset tailored for VMware environments, supporting both **vCenter** and **ESXi**. It streamlines memory and disk acquisition, forensic file collection, and threat detection for digital investigations.
 
-## Features
-- Distinguish operations between vCenter and ESXi to optimize data retrieval.
-- Roles designed for memory and disk acquisition, supporting forensic analysis needs.
-
-## Usage
-Configure the `vars.yml` for the target environment (either 'vcenter' or 'esxi'), then execute the `site.yml` playbook. Specify the target environment when launching the playbook to ensure appropriate handling of the VMware context.
-
-## Roles
-- `Mem_Acquisition`: Captures memory snapshots of specified VMs, crucial for volatile data.
-- `Disk_Acquisition`: Manages disk snapshots for non-volatile data acquisition, crucial for thorough forensic analysis.
-- `Forensic_File_Collection`: Collects important forensic files from specified paths based on the environment.
-- `THOR_Sweep`: Executes THOR sweeps for malware and threat detection.
+## Key Features
+- **Dual Environment Support**: Seamless operation in **vCenter** and **ESXi** contexts.
+- **Forensic Data Acquisition**: Capture memory snapshots and disk images for in-depth forensic analysis.
+- **Threat Detection**: Integrates with **THOR** to detect malware and indicators of compromise (IOCs).
 
 ## Setup
-Run `dependencies.sh` to set up necessary dependencies before executing the playbooks. This script prepares your environment by ensuring all required tools and libraries are installed.
+
+### 1. Install Dependencies
+Run the `dependencies.sh` script to set up the required tools and libraries:
+```bash
+./dependencies.sh
+```
+
+### 2. Configure Inventory and Variables
+
+#### Inventory File
+Edit `inventory.ini` to define your target VMware hosts. Example structure:
+```ini
+[vcenter]
+vcenter_host ansible_host=your-vcenter-ip ansible_user=your-username ansible_password=your-password
+
+[esxi]
+esxi_host ansible_host=your-esxi-ip ansible_user=your-username ansible_password=your-password
+```
+
+#### Variable Files
+Modify the appropriate variable file based on your target environment:
+- `vars-esxi.yaml` for **ESXi**.
+- `vars-vcenter.yaml` for **vCenter**.
+
+## Usage
+
+### Run the Playbook
+After setting up the inventory and variables, execute the Ansible playbook with the following command:
+
+#### For ESXi:
+```bash
+ansible-playbook -i inventory.ini site.yaml -e "target_environment=esxi"
+```
+
+#### For vCenter:
+```bash
+ansible-playbook -i inventory.ini site.yaml -e "target_environment=vcenter"
+```
+
+## Roles Overview
+The toolset includes the following Ansible roles:
+- **Mem_Acquisition**: Captures VM memory snapshots, crucial for analyzing volatile data.
+- **Disk_Acquisition**: Creates VM disk snapshots for non-volatile data acquisition.
+- **Forensic_File_Collection**: Collects specified forensic files from the environment.
+- **IOC_Sweep**: Executes **Yara-x or Thor** scans for malware and IOC detection.
 
 ## Contributing
-Contributions to enhance ForenWare are welcome. Please fork the repository, make your changes, and submit a pull request for review.
+Contributions are welcome! To contribute:
+1. Fork the repository.
+2. Make your changes.
+3. Submit a pull request for review.
 
 ## License
-Distributed under the MIT License. See `LICENSE` for more information.
+This project is distributed under the MIT License. See the `LICENSE` file for details.
